@@ -1,0 +1,22 @@
+{
+  "schema": "https://a2a.gokite.ai/schemas/agreement-command/v1",
+  "commandId": "cmd_arbiterdecided",
+  "commandType": "kite.contract.arbiter_decided",
+  "dealId": "deal_0123456789ab",
+  "expectedRevision": 8,
+  "actorAgentId": "did:kite:arbiterco:arbiter-01",
+  "termsHash": "sha256:feba188b56c1e0deba060f0284f9e26772f20802a8e95578a3a52d028e6308d4",
+  "payload": {
+    "decisionId": "dec_01",
+    "sellerBps": 6000,
+    "arbiterSig": "0x5656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656565656",
+    "expiry": 1800000000
+  },
+  "payloadHash": "sha256:358f970a3a59db849c34de2385109b2a1023e14cd727583a2b90cc9ad0e0a73f",
+  "occurredAt": "2026-08-07T09:30:00Z",
+  "signature": {
+    "profile": "secp256k1-keccak-v1",
+    "keyId": "did:kite:arbiterco:arbiter-01#jkt:07a2710f63a2d703",
+    "sig": "0x740810d10a1aec9efc09a8aefb236bc95d1278809a5365c3f5e92e351fe7cd5f559a2b76f2863a0f01724311223945eb6504bf73a8b41cc5e0f89ef8c3e997471c"
+  }
+}

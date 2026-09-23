@@ -1,0 +1,526 @@
+{
+  "version": "v1",
+  "profile": "secp256k1-keccak-v1",
+  "domainTags": {
+    "terms": "kite:a2a-agreement:terms:v1",
+    "command": "kite:a2a-agreement:command:v1",
+    "funding": "kite:a2a-agreement:funding:v1",
+    "receipt": "kite:a2a-agreement:receipt:v1"
+  },
+  "receiptSignedFields": [
+    "schema",
+    "receiptId",
+    "dealId",
+    "commandId",
+    "commandHash",
+    "fromState",
+    "toState",
+    "revision",
+    "recordedAt"
+  ],
+  "keys": {
+    "buyer": {
+      "privateKey": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "address": "0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a",
+      "thumbprint": "jkt:6a5da2aa30d9780a"
+    },
+    "seller": {
+      "privateKey": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "address": "0x1563915e194d8cfba1943570603f7606a3115508",
+      "thumbprint": "jkt:2cae26c62970654c"
+    },
+    "runtime": {
+      "privateKey": "0x3333333333333333333333333333333333333333333333333333333333333333",
+      "address": "0x5cbdd86a2fa8dc4bddd8a8f69dba48572eec07fb",
+      "thumbprint": "jkt:8c350cb27b3388df"
+    },
+    "stranger": {
+      "privateKey": "0x4444444444444444444444444444444444444444444444444444444444444444",
+      "address": "0x7564105e977516c53be337314c7e53838967bdac",
+      "thumbprint": "jkt:3dd3dd92f44ea78a"
+    },
+    "arbiter": {
+      "privateKey": "0x5555555555555555555555555555555555555555555555555555555555555555",
+      "address": "0xe1fae9b4fab2f5726677ecfa912d96b0b683e6a9",
+      "thumbprint": "jkt:07a2710f63a2d703"
+    }
+  },
+  "note": "Fixture keys are throwaway values generated for these vectors and published on purpose. Never a real Kite, agent, or user key.",
+  "cases": [
+    {
+      "set": "canonical",
+      "name": "deal-contract-minimal",
+      "note": "baseline DealContract: JCS bytes + the termsHash derived from them, with the proposer signature stripped"
+    },
+    {
+      "set": "canonical",
+      "name": "deal-contract-member-order-and-stripping",
+      "note": "wire order is irrelevant; signatures and a declared termsHash are stripped — byte-identical to the baseline"
+    },
+    {
+      "set": "canonical",
+      "name": "deal-contract-integer-members",
+      "note": "integer-valued members: any renumbering changes the bytes and breaks the signature"
+    },
+    {
+      "set": "canonical",
+      "name": "deal-contract-unicode-escaping",
+      "note": "UTF-8 emitted literally; only the JSON-mandated escapes appear"
+    },
+    {
+      "set": "canonical",
+      "name": "agreement-command-basic",
+      "note": "AgreementCommand: canonical signed bytes, with the signature member stripped"
+    },
+    {
+      "set": "settlement",
+      "name": "agreement-valid-buyer",
+      "note": "the buyer agreementSig (§4.1): agreementId32 = keccak256(UTF-8 agreement id), amount in USDC base units, KiteFulfill domain WITHOUT verifyingContract"
+    },
+    {
+      "set": "settlement",
+      "name": "agreement-valid-seller",
+      "note": "the seller agreementSig over the IDENTICAL digest — the accept gate verifies both"
+    },
+    {
+      "set": "settlement",
+      "name": "delivery-valid-seller",
+      "note": "sellerDeliverySig: deliveryHash is §4.2’s sha256 content hash as raw bytes; receiptHash is the PRIOR proof anchor"
+    },
+    {
+      "set": "settlement",
+      "name": "acceptance-valid-buyer",
+      "note": "buyerAcceptanceSig over the vault Acceptance struct"
+    },
+    {
+      "set": "settlement",
+      "name": "rejection-valid-buyer",
+      "note": "buyerRejectionSig: reasonHash = keccak256(UTF-8 reasonCode) — the §4.2 derivation inside the signed struct"
+    },
+    {
+      "set": "settlement",
+      "name": "resolution-valid-arbiter",
+      "note": "arbiterSig: decisionId (bytes32) = keccak256(UTF-8 decisionId string); sellerBps is a uint16 word"
+    },
+    {
+      "set": "settlement",
+      "name": "appeal-valid-seller",
+      "note": "sellerAppealSig over the vault Appeal struct"
+    },
+    {
+      "set": "settlement",
+      "name": "refund-consent-valid-seller",
+      "note": "sellerConsentSig over the vault RefundConsent struct"
+    },
+    {
+      "set": "settlement",
+      "name": "activation-valid-buyer",
+      "note": "buyerActivationSig: the funding artifact (§6.2.1), under the vault domain; windows are §3.1 platform config read back via the funding interaction"
+    },
+    {
+      "set": "settlement",
+      "name": "activation-valid-seller",
+      "note": "sellerActivationSig over the IDENTICAL Activation digest — the vault verifies the pair"
+    },
+    {
+      "set": "canonical",
+      "name": "deal-contract-accepted",
+      "note": "the COMMITTED shape: two entries, both with agreementSig; signatures are stripped before hashing, so the termsHash is unchanged"
+    },
+    {
+      "set": "signing",
+      "name": "terms-valid-buyer",
+      "note": "DealContract signature: over the termsHash STRING, not its bytes"
+    },
+    {
+      "set": "signing",
+      "name": "terms-valid-seller",
+      "note": "the countersignature: identical termsHash, different key, different recovered address"
+    },
+    {
+      "set": "signing",
+      "name": "command-valid-seller",
+      "note": "AgreementCommand signature"
+    },
+    {
+      "set": "signing",
+      "name": "funding-envelope-valid-buyer",
+      "note": "party envelope for the funding/evidence/proofs interactions (§6.2.1)"
+    },
+    {
+      "set": "funding",
+      "name": "valid-buyer-submission",
+      "note": "the buyer supplies its wallet, its Activation signature, and the EIP-3009 authorization bound to expectedDealId"
+    },
+    {
+      "set": "funding",
+      "name": "valid-seller-submission",
+      "note": "the seller supplies only its Activation co-signature — its one funding artifact"
+    },
+    {
+      "set": "funding",
+      "name": "reject-auth3009-without-expected-deal-id",
+      "note": "auth3009 without expectedDealId: the authorization is bound to a vault deal id nothing can then check against dealIdFor — the deal-identity binding (§6.2.1) requires the pair"
+    },
+    {
+      "set": "funding",
+      "name": "reject-buyer-sets-seller-sig",
+      "note": "role binding (§6.2.1): validated as a BUYER submission, a seller co-signature is not a buyer artifact and is rejected"
+    },
+    {
+      "set": "funding",
+      "name": "reject-malformed-auth3009",
+      "note": "auth3009 uses snake_case wire fields; the camelCase validAfter/validBefore variant that a naive client might emit is a different, invalid object"
+    },
+    {
+      "set": "funding",
+      "name": "reject-activation-sig-bad-recovery-byte",
+      "note": "65 bytes and well-formed hex, but the trailing recovery byte is 0xab. The settlement layer's SignatureChecker refuses any v outside {27,28}, and funding artifacts are write-once — accepting this would wedge the deal permanently, after the buyer's budget is committed."
+    },
+    {
+      "set": "funding",
+      "name": "reject-malformed-expected-deal-id",
+      "note": "expectedDealId must be a 0x-prefixed 32-byte (64 hex) EscrowVault deal id; a short/garbage value is rejected before it can be mistaken for a real one"
+    },
+    {
+      "set": "funding",
+      "name": "reject-seller-sets-expected-deal-id",
+      "note": "role binding (§6.2.1): validated as a SELLER submission, the buyer-only expectedDealId is rejected"
+    },
+    {
+      "set": "funding",
+      "name": "reject-seller-sets-buyer-wallet",
+      "note": "role binding: validated as a SELLER submission, the buyer wallet is rejected — a counterparty able to set it can make the deal unfundable"
+    },
+    {
+      "set": "proofs",
+      "name": "valid-chain",
+      "note": "a three-link chain: each later link quotes its predecessor, the newest proofHash is the receiptHash the next settlement signature quotes, and command identity appears only on the link an AgreementCommand drove"
+    },
+    {
+      "set": "proofs",
+      "name": "reject-snake-case-spelling",
+      "note": "a Runtime leaking its storage spelling: the required camelCase members are absent, so a consumer reads null for the receiptHash anchor and signs nothing — the failure this schema exists to make loud"
+    },
+    {
+      "set": "proofs",
+      "name": "reject-missing-proof-hash",
+      "note": "proofHash is what the next settlement signature quotes as receiptHash; a link without it cannot anchor anything"
+    },
+    {
+      "set": "proofs",
+      "name": "reject-malformed-proof-hash",
+      "note": "a proof hash is a 32-byte digest in the sha256: or 0x spelling; a short value would be padded into a different anchor"
+    },
+    {
+      "set": "proofs",
+      "name": "reject-sequence-zero",
+      "note": "the chain starts at 1: sequence 0 would make \"the proof at sequence - 1\" unresolvable"
+    },
+    {
+      "set": "signing",
+      "name": "reject-cross-tag-terms-as-command",
+      "note": "a terms signature presented as a command signature MUST NOT verify — the tags separate the families"
+    },
+    {
+      "set": "signing",
+      "name": "reject-cross-tag-command-as-terms",
+      "note": "and the reverse"
+    },
+    {
+      "set": "signing",
+      "name": "reject-cross-tag-funding-as-command",
+      "note": "the §6.2.1 funding tag is separated from the command tag too"
+    },
+    {
+      "set": "signing",
+      "name": "reject-wrong-key",
+      "note": "cryptographically valid, but recovers to an address the named agent does not hold"
+    },
+    {
+      "set": "signing",
+      "name": "reject-mutated-body",
+      "note": "body changed after signing — recovery yields an unrelated address"
+    },
+    {
+      "set": "signing",
+      "name": "reject-bare-hex-no-0x",
+      "note": "the profile fixes one spelling: 0x-prefixed 65-byte r‖s‖v. Bare hex is rejected, not guessed at"
+    },
+    {
+      "set": "signing",
+      "name": "reject-legacy-recovery-id",
+      "note": "wire v is 27/28; the raw 0/1 recovery id MUST be rejected, not silently normalized"
+    },
+    {
+      "set": "signing",
+      "name": "reject-truncated-signature",
+      "note": "a signature that is not exactly 65 bytes is malformed"
+    },
+    {
+      "set": "commands",
+      "name": "valid-delivered",
+      "note": "kite.contract.delivered: schema-valid and correctly signed by the seller"
+    },
+    {
+      "set": "commands",
+      "name": "valid-accepted",
+      "note": "kite.contract.accepted: schema-valid and correctly signed by the buyer"
+    },
+    {
+      "set": "commands",
+      "name": "valid-rejected",
+      "note": "kite.contract.rejected: schema-valid and correctly signed by the buyer"
+    },
+    {
+      "set": "commands",
+      "name": "valid-appealed",
+      "note": "kite.contract.appealed: schema-valid and correctly signed by the seller"
+    },
+    {
+      "set": "commands",
+      "name": "valid-refund-consented",
+      "note": "kite.contract.refund_consented: schema-valid and correctly signed by the seller"
+    },
+    {
+      "set": "commands",
+      "name": "valid-arbiter-decided",
+      "note": "kite.contract.arbiter_decided: schema-valid and correctly signed by the arbiter"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-unknown-command-type",
+      "note": "commandType is a closed enum — an unknown type is rejected at the schema, before any state logic"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-missing-payload-hash",
+      "note": "payloadHash is required: without it a Runtime cannot tell a swapped payload from a bad signature"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-negative-revision",
+      "note": "expectedRevision is an integer of at least 1"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-zero-revision",
+      "note": "expectedRevision 0 is rejected, not read as an opt-out from the concurrency check"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-command-id-shape",
+      "note": "commandId must match ^cmd_[A-Za-z0-9]+$ — it is an idempotency key, not free text"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-additional-member",
+      "note": "additionalProperties is false: an unknown member would sit inside the signature but outside every implementation's understanding of it"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-actor-not-a-did",
+      "note": "actorAgentId must be a did:kite DID — a bare id cannot be resolved to a key"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-terms-hash-spelling",
+      "note": "hash references are the sha256:<64 lowercase hex> string form throughout"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-delivered-empty-payload",
+      "note": "the delivered payload requires evidenceId and deliveryHash — an empty payload names no artifact and cannot settle"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-accepted-with-delivery-payload",
+      "note": "payload members are bound to their commandType: delivery members inside an accepted command are rejected, not ignored"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-delivered-extra-payload-member",
+      "note": "additionalProperties is false inside the payload too — an unknown payload member would sit inside the signature but outside the contract"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-accepted-empty-payload",
+      "note": "fixed_outcome/v1 settles on chain: every payload carries its settlement signature and expiry, so no payload is ever the empty object"
+    },
+    {
+      "set": "commands",
+      "name": "invalid-zero-expiry",
+      "note": "expiry bounds the embedded settlement signature: zero is not a bound, and the vault rejects an expired call"
+    },
+    {
+      "set": "commands",
+      "name": "conflict-idempotency-divergent-replay",
+      "note": "reusing a commandId with different content is a conflict, not a retry — both bodies are schema-valid"
+    },
+    {
+      "set": "commands",
+      "name": "conflict-stale-revision",
+      "note": "expectedRevision behind the agreement: the actor signed against a state that has since moved"
+    },
+    {
+      "set": "receipts",
+      "name": "valid-command-driven",
+      "note": "party-command transition: commandId/commandHash present and inside the signature"
+    },
+    {
+      "set": "receipts",
+      "name": "audit-restamp-keeps-signature",
+      "note": "the audit fields are excluded from the preimage, so a re-stamp reuses the signature — and is therefore not evidence"
+    },
+    {
+      "set": "receipts",
+      "name": "valid-runtime-driven-no-command",
+      "note": "chain observation: commandId/commandHash omitted from the canonical object, never null"
+    },
+    {
+      "set": "receipts",
+      "name": "valid-but-unsigned",
+      "note": "runtimeSignature: null is schema-VALID and a visible non-guarantee — distinct from receipt: null, which means no receipt at all"
+    },
+    {
+      "set": "receipts",
+      "name": "reject-mutated-transition",
+      "note": "toState is inside the preimage: changing the transition breaks the signature"
+    },
+    {
+      "set": "receipts",
+      "name": "reject-signed-by-non-runtime",
+      "note": "a well-formed signature from a key that is not the pinned Runtime key"
+    },
+    {
+      "set": "errors",
+      "name": "valid-invalid-command-schema",
+      "note": "the command failed schema validation for its declared schema/version"
+    },
+    {
+      "set": "errors",
+      "name": "valid-unsupported-extension-version",
+      "note": "refused before formation, so it carries no deal identity"
+    },
+    {
+      "set": "errors",
+      "name": "valid-invalid-signature",
+      "note": "the signature did not verify against the resolved actor key, profile and domain tag"
+    },
+    {
+      "set": "errors",
+      "name": "valid-unknown-key",
+      "note": "the keyId did not resolve, or was not valid at command time"
+    },
+    {
+      "set": "errors",
+      "name": "valid-runtime-key-required",
+      "note": "one or both Agreement signatures omitted their runtime keyId"
+    },
+    {
+      "set": "errors",
+      "name": "valid-runtime-not-found",
+      "note": "the selected runtime key does not resolve"
+    },
+    {
+      "set": "errors",
+      "name": "valid-runtime-pending",
+      "note": "the selected runtime is pending and may be retried after activation"
+    },
+    {
+      "set": "errors",
+      "name": "valid-runtime-revoked",
+      "note": "the selected runtime was revoked permanently"
+    },
+    {
+      "set": "errors",
+      "name": "valid-runtime-agent-mismatch",
+      "note": "the selected runtime belongs to a different Agent DID"
+    },
+    {
+      "set": "errors",
+      "name": "valid-runtime-signature-mismatch",
+      "note": "the Agreement signature does not verify under its declared runtime key"
+    },
+    {
+      "set": "errors",
+      "name": "valid-agreement-runtime-mismatch",
+      "note": "the request used a runtime other than the authority pinned to the Agreement"
+    },
+    {
+      "set": "errors",
+      "name": "valid-unauthorized-actor",
+      "note": "a genuine signature from a party that does not own this command type"
+    },
+    {
+      "set": "errors",
+      "name": "valid-unknown-deal",
+      "note": "dealId does not resolve, so no other context can be reported"
+    },
+    {
+      "set": "errors",
+      "name": "valid-terms-hash-mismatch",
+      "note": "the command's termsHash is not the accepted contract's"
+    },
+    {
+      "set": "errors",
+      "name": "valid-payload-hash-mismatch",
+      "note": "the recomputed payload hash differs from the claimed one"
+    },
+    {
+      "set": "errors",
+      "name": "valid-revision-conflict",
+      "note": "the retriable case, carrying currentRevision so the retry costs one round trip"
+    },
+    {
+      "set": "errors",
+      "name": "valid-idempotency-conflict",
+      "note": "commandId identifies which in-flight id collided; not retriable"
+    },
+    {
+      "set": "errors",
+      "name": "valid-illegal-transition",
+      "note": "the command type is not legal from the current state; currentState says what is"
+    },
+    {
+      "set": "errors",
+      "name": "valid-deadline-exceeded",
+      "note": "the platform window elapsed; the deadline edge, not this command, governs"
+    },
+    {
+      "set": "errors",
+      "name": "valid-evidence-not-validated",
+      "note": "the cited evidence is missing or failed intake validation"
+    },
+    {
+      "set": "errors",
+      "name": "valid-funding-not-final",
+      "note": "funding is broadcast but not final; retry after the stated delay"
+    },
+    {
+      "set": "errors",
+      "name": "valid-rate-limited",
+      "note": "a caller-level limit, carrying the delay a client MUST honour"
+    },
+    {
+      "set": "errors",
+      "name": "valid-internal-error",
+      "note": "transient Runtime failure; retry idempotently under the same commandId"
+    },
+    {
+      "set": "errors",
+      "name": "reject-unknown-code",
+      "note": "codes are enumerated: an unhandled branch fails as a schema error"
+    },
+    {
+      "set": "errors",
+      "name": "reject-retriable-contradicts-catalog",
+      "note": "schema-valid but semantically wrong — retriable disagrees with the catalog, caught by the cross-check rather than the schema"
+    },
+    {
+      "set": "errors",
+      "name": "reject-missing-retriable",
+      "note": "retriable is required on the wire, not inferred from a vendored catalog"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schema": "https://a2a.gokite.ai/schemas/agreement-transition-receipt/v1",
+  "receiptId": "atr_01",
+  "dealId": "deal_0123456789ab",
+  "commandId": "cmd_01",
+  "commandHash": "sha256:3537dcd132359bfeadf2b1ea87c5e4e426f30c60c3d35ab941ca1bd4f6f1ee90",
+  "fromState": "FULFILLING",
+  "toState": "DELIVERED",
+  "revision": 4,
+  "recordedAt": "2026-08-07T09:30:01Z",
+  "auditStatus": "pending",
+  "runtimeSignature": {
+    "keyId": "did:kite:kite:coordination-engine#jkt:8c350cb27b3388df",
+    "sig": "0xcf13f3a84fbcaed793fb4418a40bb4e26fab336e0c12bc71a1b47ff4b702f07375cdefd7eb0f11637ede46ca9778f26b09346bee7c03c986cc6b5072b54161a11c"
+  }
+}

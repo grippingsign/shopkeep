@@ -1,0 +1,38 @@
+{
+  "name": "shopkeep",
+  "version": "0.1.0",
+  "description": "Kite A2A Coordination Extension v1 的 TypeScript 校验工具箱：签名恢复、EIP-712 结算摘要、转换证明链，并回放官方全部八个离线向量集合",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "vectors": "tsx src/cli.ts vectors",
+    "capture": "tsx src/cli.ts capture"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "a2a",
+    "kite",
+    "coordination",
+    "secp256k1",
+    "eip-712",
+    "rfc8785",
+    "conformance"
+  ],
+  "dependencies": {
+    "@noble/curves": "^2.4.0",
+    "@noble/hashes": "^2.4.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "canonicalize": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}
