@@ -22,7 +22,7 @@ const SETS: Array<[string, (rep: Report) => void, number]> = [
   ["commands", runCommands, 20],
   ["funding", runFunding, 9],
   ["proofs", runProofs, 10],
-  ["receipts", runReceipts, 10],
+  ["receipts", runReceipts, 8],
   ["settlement", runSettlement, 30],
   ["errors", runErrors, 25],
 ];

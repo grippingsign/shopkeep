@@ -42,7 +42,9 @@ function wAddr(a: string): Uint8Array {
   if (!/^[0-9a-fA-F]{40}$/.test(h)) {
     throw new Error(`不是地址: ${a}`);
   }
-  return concat(new Uint8Array(12), wB32(h));
+  const raw = new Uint8Array(20);
+  for (let i = 0; i < 20; i++) raw[i] = parseInt(h.slice(2 * i, 2 * i + 2), 16);
+  return concat(new Uint8Array(12), raw);
 }
 
 /** struct 里一个字段的 ABI 词。包含规范派生：agreementId、reasonHash、decisionId。 */

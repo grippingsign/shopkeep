@@ -6,13 +6,14 @@
 // 以及 stateHash 双向核对。任何一条对不上，这条链就不能拿来当证据。
 import { readFileSync } from "node:fs";
 import { Ajv2020 } from "ajv/dist/2020.js";
-import addFormats from "ajv-formats";
+import addFormatsModule from "ajv-formats";
 import { Report, readSchema } from "./harness.js";
 import { proofHash, stateHash, type ProofLink } from "./proof.js";
 import { verifies } from "./secp.js";
 import { concat, utf8 } from "./bytes.js";
 
 const PROOF_TAG = "kite:fulfill:transition-proof:v1";
+const addFormats = (addFormatsModule as any).default ?? addFormatsModule;
 
 export function runProofCapture(rep: Report, path: string): void {
   const prefix = "capture/proofs";
