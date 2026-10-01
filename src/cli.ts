@@ -27,7 +27,7 @@ import {
 const USAGE = `shopkeep — Kite A2A Coordination Extension v1 的 TS 校验工具箱
 
 用法:
-  shopkeep vectors [--strict] [--json]   回放全部离线向量集合
+  shopkeep vectors [--only <set>] [--strict] [--json]   回放离线向量集合
   shopkeep capture <file.json> [--json]  校验一份抓取的 agreement-proofs 响应
   shopkeep check <file.json> [选项]      校验任意一份 v1 协议文档
 
@@ -38,6 +38,17 @@ check 选项:
 --strict: 有跳过的用例时以非零退出。发布门禁用它；不用的场合
           一次纯文档检查的运行会以 0 退出，别读成符合性信号。
 --json:   输出机器可读报告（passed/failed/skipped + 原因），退出码不变。`;
+
+const VECTOR_RUNNERS = {
+  canonical: runCanonical,
+  signing: runSigning,
+  commands: runCommands,
+  funding: runFunding,
+  proofs: runProofs,
+  receipts: runReceipts,
+  settlement: runSettlement,
+  errors: runErrors,
+} as const;
 
 function finish(rep: Report, strict: boolean, json: boolean): number {
   if (json) console.log(JSON.stringify(rep.toJSON(), null, 2));
@@ -59,23 +70,26 @@ function main(argv: string[]): number {
       return 0;
     }
     const rep = new Report();
-    runCanonical(rep);
-    runSigning(rep);
-    runCommands(rep);
-    runFunding(rep);
-    runProofs(rep);
-    runReceipts(rep);
-    runSettlement(rep);
-    runErrors(rep);
+    const selected = flag(rest, "--only");
+    if (selected && !(selected in VECTOR_RUNNERS)) {
+      console.error(`未知向量集合: ${selected}；可选值: ${Object.keys(VECTOR_RUNNERS).join(", ")}`);
+      return 1;
+    }
+    const runners = selected
+      ? [[selected, VECTOR_RUNNERS[selected as keyof typeof VECTOR_RUNNERS]] as const]
+      : Object.entries(VECTOR_RUNNERS);
+    for (const [, run] of runners) run(rep);
     // 状态机转移与资金绑定是活体行为，离线跑不了，如实记账。
-    rep.skip(
-      "transitions (live)",
-      "needs a Runtime endpoint: these are properties of a live agreement, not of a document",
-    );
-    rep.skip(
-      "funding/dealIdentity (live)",
-      "needs a Runtime endpoint: refuse-before-broadcast is a property of a live Runtime",
-    );
+    if (!selected) {
+      rep.skip(
+        "transitions (live)",
+        "needs a Runtime endpoint: these are properties of a live agreement, not of a document",
+      );
+      rep.skip(
+        "funding/dealIdentity (live)",
+        "needs a Runtime endpoint: refuse-before-broadcast is a property of a live Runtime",
+      );
+    }
     return finish(rep, rest.includes("--strict"), rest.includes("--json"));
   }
 
