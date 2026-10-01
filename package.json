@@ -8,7 +8,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "vectors": "tsx src/cli.ts vectors",
-    "capture": "tsx src/cli.ts capture"
+    "capture": "tsx src/cli.ts capture",
+    "check": "tsx src/cli.ts check"
   },
   "engines": {
     "node": ">=20"

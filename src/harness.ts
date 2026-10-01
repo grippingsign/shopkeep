@@ -91,4 +91,14 @@ export class Report {
     if (strict) return 2;
     return 0;
   }
+
+  /** 机器可读报告（--json）：给 CI / 别的工具消费的口径，与人读的一致。 */
+  toJSON(): object {
+    return {
+      passed: this.passed.length,
+      failed: this.failed,
+      skipped: this.skipped,
+      conformancePass: this.failed.length === 0 && this.skipped.length === 0,
+    };
+  }
 }

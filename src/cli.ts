@@ -1,12 +1,16 @@
 // shopkeep 的命令行入口。
 //
-// 两个命令：
+// 三个命令：
 //   vectors            回放 vendor/vectors 下的八个离线集合
 //   capture <file>     校验一份抓回来的 agreement-proofs 响应
+//   check <file>       校验任意一份 v1 协议文档（自动识别类型）
+//
+// 所有命令都接受 --json：输出机器可读报告而不是人读摘要，退出码不变。
 //
 // live 转移（状态机、actor 绑定、并发语义）不是文档能验证的东西，
 // 需要真实 Runtime——本版本和官方 runner 一样，如实标注“未实现”，
 // 不装作通过。
+import { runCheck } from "./check.js";
 import { runProofCapture } from "./capture.js";
 import { Report } from "./harness.js";
 import {
@@ -23,11 +27,28 @@ import {
 const USAGE = `shopkeep — Kite A2A Coordination Extension v1 的 TS 校验工具箱
 
 用法:
-  shopkeep vectors [--strict]    回放全部离线向量集合
-  shopkeep capture <file.json>   校验一份抓取的 agreement-proofs 响应
+  shopkeep vectors [--strict] [--json]   回放全部离线向量集合
+  shopkeep capture <file.json> [--json]  校验一份抓取的 agreement-proofs 响应
+  shopkeep check <file.json> [选项]      校验任意一份 v1 协议文档
+
+check 选项:
+  --signer <address>              期望的签名恢复地址（Runtime / actor）
+  --expect-terms-hash <sha256:…>  与 deal-contract 的 canonical 派生比对
 
 --strict: 有跳过的用例时以非零退出。发布门禁用它；不用的场合
-          一次纯文档检查的运行会以 0 退出，别读成符合性信号。`;
+          一次纯文档检查的运行会以 0 退出，别读成符合性信号。
+--json:   输出机器可读报告（passed/failed/skipped + 原因），退出码不变。`;
+
+function finish(rep: Report, strict: boolean, json: boolean): number {
+  if (json) console.log(JSON.stringify(rep.toJSON(), null, 2));
+  return rep.summary(strict);
+}
+
+function flag(rest: string[], name: string): string | undefined {
+  const i = rest.indexOf(name);
+  if (i === -1) return undefined;
+  return rest[i + 1];
+}
 
 function main(argv: string[]): number {
   const [cmd, ...rest] = argv;
@@ -37,7 +58,6 @@ function main(argv: string[]): number {
       console.log(USAGE);
       return 0;
     }
-    const strict = rest.includes("--strict");
     const rep = new Report();
     runCanonical(rep);
     runSigning(rep);
@@ -56,18 +76,33 @@ function main(argv: string[]): number {
       "funding/dealIdentity (live)",
       "needs a Runtime endpoint: refuse-before-broadcast is a property of a live Runtime",
     );
-    return rep.summary(strict);
+    return finish(rep, rest.includes("--strict"), rest.includes("--json"));
   }
 
   if (cmd === "capture") {
-    const file = rest[0];
+    const file = rest.find((a) => !a.startsWith("--"));
     if (!file) {
       console.error("capture 需要一个文件参数");
       return 1;
     }
     const rep = new Report();
     runProofCapture(rep, file);
-    return rep.summary(true);
+    return finish(rep, true, rest.includes("--json"));
+  }
+
+  if (cmd === "check") {
+    const file = rest.find((a) => !a.startsWith("--"));
+    if (!file) {
+      console.error("check 需要一个文件参数\n");
+      console.log(USAGE);
+      return 1;
+    }
+    const rep = new Report();
+    runCheck(rep, file, {
+      signer: flag(rest, "--signer"),
+      expectTermsHash: flag(rest, "--expect-terms-hash"),
+    });
+    return finish(rep, true, rest.includes("--json"));
   }
 
   console.error(`未知命令: ${cmd}\n`);

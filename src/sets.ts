@@ -22,11 +22,14 @@ ajv.addFormat("uri", true);
 // ajv 的 ValidateFunction 是类型谓词（data is T），在条件里会把 any
 // 收窄成 unknown，后面的属性访问就全报错了。这里把它当普通的
 // (data) => boolean 用——校验结果本来就该由调用处自己判断。
-function validator(schema: any): (data: any) => boolean {
+export function validator(schema: any): (data: any) => boolean {
   // Each replay run gets a fresh schema instance; the aggregate test invokes
   // the same runner more than once and Ajv rejects duplicate $id registrations.
-  return new Ajv2020({ strict: false, allErrors: true })
-    .compile(schema) as (data: any) => boolean;
+  const fresh = new Ajv2020({ strict: false, allErrors: true });
+  // 同上：注册宽松形态检查，避免 unknown format 警告刷屏。
+  fresh.addFormat("date-time", /^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/);
+  fresh.addFormat("uri", true);
+  return fresh.compile(schema) as (data: any) => boolean;
 }
 
 function str(x: unknown): string {
